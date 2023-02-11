@@ -8,7 +8,7 @@ environment: python3.8↑
 $ cd backend
 $ pip install -r requirements.txt
 
-// Lunach Backend
+Lunach Backend
 $ python main.py (or python3.9 main.py)
 ```
 
@@ -17,13 +17,14 @@ $ python main.py (or python3.9 main.py)
 $ cd frontend
 $ npm install
 
-// Lunach frontend
-// Option 1: test in computer
-$ HTTPS=true npm start  /* Obtain HTTPS url */
+Lunach frontend
+Option 1: test in computer
+$ HTTPS=true npm start  //Obtain HTTPS url
 
-// Option 2: test in line app on mobile
-$ npm start /* Obtain HTTP url */
-// in other terminal
+Option 2: test in line app on mobile
+$ npm start //Obtain HTTP url
+
+in other terminal
 $ ngrok http 3000 --host-header="localhost:3000"
-// then copy the url and paste to Endpoint URL & Callback URL of liff on LINE Developer
+then copy the url and paste to Endpoint URL & Callback URL of liff on LINE Developer
 ```
