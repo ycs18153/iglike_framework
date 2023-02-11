@@ -5,9 +5,17 @@ import React from "react"
 import ReactDOM from "react-dom"
 import reportWebVitals from "./reportWebVitals"
 
+import { LiffProvider } from 'react-liff';
+// import { BrowserRouter } from "react-router-dom";
+// import { Route, Routes } from "react-router-dom";
+
+const liffId = "1657883296-DR8N1ejq";
+
 ReactDOM.render(
     <React.StrictMode>
-        <App />
+        <LiffProvider liffId={liffId}>
+            <App />
+        </LiffProvider>
     </React.StrictMode>,
     document.getElementById("root")
 )
