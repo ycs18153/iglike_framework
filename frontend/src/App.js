@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useLiff } from 'react-liff';
 
@@ -27,6 +28,15 @@ const App = () => {
                 </button>
             );
         }
+        if (isLoggedIn) {
+            axios('/iglike/uu')
+                .then((response) => {
+                    if (response['data'] === '-1') {
+                        setDisplayName('Unauth')
+                    }
+                })
+        }
+
         return (
             <>
                 <p>Welcome to the react-liff demo app, {displayName}!</p>

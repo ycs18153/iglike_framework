@@ -30,6 +30,9 @@ async def list_users(request: Request):
 async def show_user(id: str, request: Request):
     if (user := await request.app.mongodb["auth_user"].find_one({"uid": id})) is not None:
         return user
+    else:
+        return '-1'
+        
 
     raise HTTPException(status_code=404, detail=f"user {id} not found")
 
