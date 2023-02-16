@@ -2,6 +2,20 @@
 
 environment: python3.8↑
 
+##### Git Flow
+```
+Clone first
+$ git clone https://github.com/ycs18153/iglike_framework.git
+
+Create 'develop' branch in local,
+And make the consistency of remote and local `develop` content.
+$ git checkout -b develop
+$ git pull origin develop
+
+Start implement the new feature
+$ git checkout -b feature/the-description-of-the-new-function develop
+```
+
 
 ##### Backend setup
 ```
