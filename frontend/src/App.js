@@ -22,11 +22,7 @@ const App = () => {
         if (!isReady) return <p>Loading...</p>;
 
         if (!isLoggedIn) {
-            return (
-                <button className="App-button" onClick={liff.login}>
-                    Login
-                </button>
-            );
+            liff.login()
         }
         if (isLoggedIn) {
             axios('/iglike/uu')
