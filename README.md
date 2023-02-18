@@ -2,20 +2,41 @@
 
 environment: python3.8↑
 
-##### Git Flow
-```
-Clone first
-$ git clone https://github.com/ycs18153/iglike_framework.git
+---
 
-Create 'develop' branch in local,
+##### Git Flow
+1. Clone first
+```shell
+$ git clone https://github.com/ycs18153/iglike_framework.git
+```
+
+2. Create 'develop' branch in local,
 And make the consistency of remote and local `develop` content.
+
+```shell
 $ git checkout -b develop
 $ git pull origin develop
-
-Start implement the new feature
+```
+3. Start implement the new feature
+```shell
 $ git checkout -b feature/the-description-of-the-new-function develop
 ```
 
+4. Make a commit
+```shell
+$ git commit -m 'feat: put the topic of your changes down here'
+```
+*p.s. you can still make more description from the third line which is after pressing shift+enter twice*
+[For more guides plz click here](https://wadehuanglearning.blogspot.com/2019/05/commit-commit-commit-why-what-commit.html)
+
+5. Push your commit
+```shell
+$ git branch --set-upstream-to origin/feature/the-description-of-the-new-function
+$ git push
+```
+*p.s. for the first time push a new branch you need to set upstream before you push*
+
+---
 
 ##### Backend setup
 ```
