@@ -84,7 +84,6 @@ async def show_user(id: str, request: Request):
 #     raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
 
-# http://localhost:8000/iglike/autolike/weijyueye/Kobayasi19951212!/1/5/camping/50
 @router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
 async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: int, hashtag: str, maxLike: int):
     options = Options()
