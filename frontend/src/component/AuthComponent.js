@@ -1,14 +1,24 @@
-import React from 'react'
+import Container from 'react-bootstrap/Container';
+import Button from 'react-bootstrap/Button';
+import { Link } from 'react-router-dom';
 
-function Auth() {
-    return (
-        <header className="App-header">
-            <div>
-                <h1>Authenticated uid!</h1>
-            </div>
-        </header>
-        
-    )
-}
+import AutoLikeComponent from './ig_function/auto_like/AutoLikeComponent'
+
+import './AuthComponent.css';
+
+const showAutoLikePage = () => {
+    return <AutoLikeComponent></AutoLikeComponent>
+};
+
+const Auth = () => (
+    <Container className="p-3">
+        <Container className="p-5 mb-4 bg-light rounded-3">
+        <h2 className="header">Welcome To IG Like system</h2>
+            <Link to="/auto-like">
+                <Button onClick="/auto-like">自動按讚</Button>
+            </Link>
+        </Container>
+    </Container>
+);
 
 export default Auth;

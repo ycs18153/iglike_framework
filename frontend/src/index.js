@@ -5,9 +5,9 @@ import React from "react"
 import ReactDOM from "react-dom"
 import reportWebVitals from "./reportWebVitals"
 
+import Router from './Router'
+
 import { LiffProvider } from 'react-liff';
-// import { BrowserRouter } from "react-router-dom";
-// import { Route, Routes } from "react-router-dom";
 
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -17,7 +17,9 @@ const liffId = "1657883296-DR8N1ejq";
 ReactDOM.render(
     <React.StrictMode>
         <LiffProvider liffId={liffId}>
-            <App />
+            <Router>
+                <App />
+            </Router>
         </LiffProvider>
     </React.StrictMode>,
     document.getElementById("root")
