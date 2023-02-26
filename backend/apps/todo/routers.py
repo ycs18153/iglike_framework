@@ -10,7 +10,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import random
+import json
 import requests
+import asyncio
+from fastapi import FastAPI, BackgroundTasks
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -83,9 +86,7 @@ async def show_user(id: str, request: Request):
 
 #     raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
-
-@router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
-async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: int, hashtag: str, maxLike: int):
+async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag, maxLike):
     options = Options()
     options.add_argument("--disable-notifications")
     options.add_argument("--start-maximized")  # max. the window size
@@ -96,9 +97,21 @@ async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: 
         '/Users/twlin/code/iglike_framework/backend/apps/todo/chromedriver', chrome_options=options)
     action = webdriver.ActionChains(driver)
 
+    # load cookie -> for testing
+    # with open('/Users/twlin/code/iglike_framework/backend/apps/todo/cookie_jar.json') as f:
+    #     cookies = json.load(f)
+
     driver.get("https://www.instagram.com/")
 
-    # 抓取：帳號密碼輸入框
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
+
+    # load cookie -> for testing
+    # for cookie in cookies:
+    #     driver.add_cookie(cookie)
+    # driver.refresh()
+
+    # # 抓取：帳號密碼輸入框
     try:
         account_textbox = WebDriverWait(driver, 10, 0.2).until(
             EC.presence_of_element_located((By.NAME, "username")), '-1')
@@ -153,61 +166,120 @@ async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: 
     print('已按下`稍後再說`，等待：', minWaitTime, '~', maxWaitTime, '秒，就找hashtag')
 
     # 找 hashtag
-    time.sleep(random.randint(minWaitTime, maxWaitTime))
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
     driver.get("https://www.instagram.com/explore/tags/" + hashtag)
 
-    time.sleep(random.randint(minWaitTime, maxWaitTime))
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
+    webBody = WebDriverWait(driver, 10, 0.2).until(
+        EC.presence_of_element_located((By.TAG_NAME, "body")), '-1')
+    webBody.send_keys(Keys.SPACE)
+    # driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.SPACE)
 
-    #
-    liked = 0
-    while liked <= maxLike:
-        # 先往下拉，試圖抓到貼文
-        print('往下滑')
-        for i in range(4):
-            time.sleep(random.randint(minWaitTime, maxWaitTime))
-            driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.SPACE)
-
-        # 抓到目前所能見的貼文們
-        post_count = WebDriverWait(driver, 10, 0.2).until(EC.presence_of_element_located(
-            (By.XPATH, "//div[@class='_aabd _aa8k _aanf']")), '-1')
-        print("目前抓到：", len(post_count), "篇貼文")
-        for pc in post_count:
-            print('post_count = ', pc.text)
-
-        # 去看抓到的post之href值
-        # 這是為了去看：當下一次while時，page會再往下拉，此時去看這次抓到的href跟上次抓到的是否會一樣
-        # --- 卡在這，會抓到上一round的post之div，但這些div照理說在頁面已經invisable ---#
-        for post in post_count:
-            a = post.find_element(By.CSS_SELECTOR, 'a')
-            href = a.get_attribute('href')
-            print(href)
-
-        # 隨機按 (目前抓到的所有貼文數/2) 篇貼文的讚
-        for round in range(int(len(post_count)/2)):
-            liked = liked + 1
-            time.sleep(random.randint(minWaitTime, maxWaitTime))
-            # 點進某篇貼文
-            post_count[random.randint(0, len(post_count) - 1)].click()
-            time.sleep(random.randint(minWaitTime, maxWaitTime))
-            # 按讚
+    round = 1
+    liked = 1
+    while liked < maxLike:
+        print('==============')
+        print('Round: ', round)
+        await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+        # time.sleep(random.randint(minWaitTime, maxWaitTime))
+        try:
+            posts = WebDriverWait(driver, 10, 0.2).until(EC.presence_of_all_elements_located(
+                (By.XPATH, "//div[@class='_aabd _aa8k _aanf']")), '-1')
+            # posts = driver.find_elements(
+            #     By.XPATH, "//div[@class='_aabd _aa8k _aanf']")
+            print("抓到： ", len(posts), " 篇")
+        except Exception as e:
+            print(e)
+            print("抓到 invisible element 之貼文")
+            pass
+        # 點進某篇貼文
+        time.sleep(random.randint(minWaitTime, maxWaitTime))
+        try:
+            #
+            r_num = random.randint(0, len(posts) - 1)
+            print("亂數： ", r_num)
+            posts[r_num].click()
+            #
+            # posts[random.randint(0, len(posts) - 1)].click()
+        except Exception as e:
+            print(e)
+            print("1. 被限制 or 2. 點選到 invisible element 之貼文")
+            return '666 Auto Like has been Limited'
+            driver.quit()
+            break
+        await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+        # time.sleep(random.randint(minWaitTime, maxWaitTime))
+        # 按讚
+        try:
             likeBtn_att = WebDriverWait(driver, 10, 0.2).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, "section._aamu._ae3_ span._aamw button._abl- svg")), '-1')
+        except Exception as e:
+            print(e)
+            print('標籤改變或抓不到: likeBtn_att')
+            break
+        try:
             likeBtn = WebDriverWait(driver, 10, 0.2).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, "section._aamu._ae3_ span._aamw button")), '-1')
-            if likeBtn_att.get_attribute('aria-label') == '讚':
-                time.sleep(random.randint(minWaitTime, maxWaitTime))
+        except Exception as e:
+            print(e)
+            print('標籤改變或抓不到: likeBtn')
+            break
+        if likeBtn_att.get_attribute('aria-label') == '讚':
+            try:
+                print("按了第 ", liked, " 篇讚")
+                try:
+                    author = WebDriverWait(driver, 10, 0.2).until(EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "div._aacl._aaco._aacw._aacx._aad6._aade div.xt0psk2 div.xt0psk2 a")), '-1')
+                    # author = driver.find_element(
+                    #     By.XPATH, "//div[@class='_aacl _aaco _aacw _aacx _aad6 _aade']//div[@class='xt0psk2']//span[@class='_aap6 _aap7 _aap8']//a[@class='x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _acan _acao _acat _acaw _aj1- _a6hd']").text
+                    print("Po文作者: ", author.text)
+                except Exception as e:
+                    print(e)
+                    print("Po文作者標籤改變")
+                    pass
+                await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+                # time.sleep(random.randint(minWaitTime, maxWaitTime))
                 likeBtn.click()
-                print(liked, '. 讚')
-                time.sleep(random.randint(minWaitTime, maxWaitTime))
-            else:
-                print(liked, '. 此篇已按過讚，故略過')
-            webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                liked = liked + 1
+                await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+                # time.sleep(random.randint(minWaitTime, maxWaitTime))
+            except Exception as e:
+                print(e)
+                print("按讚發生問題")
+                # time.sleep(150)
+                pass
+        else:
+            try:
+                webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+                # time.sleep(random.randint(minWaitTime, maxWaitTime))
+                print(liked, '. 此篇已按過讚，故略過並往下滑')
+                for i in range(3):
+                    print("下滑 ", i, " 次")
+                    # Scroll down to bottom
+                    driver.execute_script(
+                        "window.scrollTo(0, document.body.scrollHeight);")
+                    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+                    # time.sleep(random.randint(minWaitTime, maxWaitTime))
+                round = round + 1
+                print("========")
+                continue
+            except Exception as e:
+                print(e)
+                print("下拉發生問題")
+                pass
+        round = round + 1
+        webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+        print("========")
 
     time.sleep(20)
     driver.quit()
-    #
 
-    # users = []
-    # for doc in await request.app.mongodb["auth_user"].find().to_list(length=100):
-    #     users.append(doc)
-    # return users
+
+@router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
+async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: int, hashtag: str, maxLike: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(
+        auto_like_implem, account, password, minWaitTime, maxWaitTime, hashtag, maxLike)
+    return 'op'
