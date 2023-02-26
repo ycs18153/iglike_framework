@@ -1,5 +1,6 @@
 import {Container, Form, Button} from 'react-bootstrap';
 import { useState } from 'react';
+import axios from 'axios';
 
 import './AutoLikeComponent.css';
 
@@ -18,6 +19,21 @@ const AutoLikeComponent = () => {
         const handleSubmit = (event) => {
             event.preventDefault();
             console.log(inputs);
+            // @router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
+            axios('/iglike/autolike/' 
+                + inputs['username'] + "/"
+                + inputs['password'] + "/"
+                + inputs['minimumWaitingTime'] + "/"
+                + inputs['maximumWaitingTime'] + "/"
+                + inputs['hashtag'] + "/"
+                + inputs['maximumLikeAmount'])
+            .then((response) => {
+                if (response['data'] === 'op') {
+                    window.alert('程式執行中，請稍候至查詢頁面查看結果')
+                } else {
+                    window.alert('程式錯誤。')
+                }
+            })
         }
 
         return (
