@@ -10,22 +10,22 @@ const Auth = () => (
             <h2 className="header">Welcome To IG Like system</h2>
             <Container className='row mt-1'>
                 <Link to="/auto-like">
-                    <Button onClick="/auto-like">自動按讚</Button>
+                    <Button>自動按讚</Button>
                 </Link>
             </Container>
             <Container className='row mt-1'>
                 <Link to="/auto-follow">
-                    <Button onClick="/auto-follow">自動追蹤</Button>
+                    <Button>自動追蹤</Button>
                 </Link>
             </Container>
             <Container className='row mt-1'>
                 <Link to="/auto-dm">
-                    <Button onClick="/auto-dm">自動私訊</Button>
+                    <Button>自動私訊</Button>
                 </Link>
             </Container>
             <Container className='row mt-1'>
                 <Link to="/auto-unfollow">
-                    <Button onClick="/auto-unfollow">自動退追</Button>
+                    <Button>自動退追</Button>
                 </Link>
             </Container>
         </Container>
