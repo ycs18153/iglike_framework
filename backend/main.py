@@ -5,6 +5,10 @@ from config import settings
 
 from apps.todo.routers import router as todo_router
 
+#
+import asyncio
+#
+
 app = FastAPI()
 
 
@@ -23,6 +27,7 @@ app.include_router(todo_router, tags=["iglike"], prefix="/iglike")
 
 
 if __name__ == "__main__":
+    # uvicorn.run(main())
     uvicorn.run(
         "main:app",
         host=settings.HOST,

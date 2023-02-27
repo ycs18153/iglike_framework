@@ -15,11 +15,22 @@ from fastapi import FastAPI, BackgroundTasks
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
+import pymongo
+from pymongo import MongoClient
+import certifi
+from datetime import datetime
 #
 
 from .models import Model, updateModel
 
 router = APIRouter()
+
+#
+mongoClient = pymongo.MongoClient(
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+iglike_auth = mongoClient["iglike_auth"]  # 指定資料庫
+autoLikeResult_table = iglike_auth["autoLikeResult"]  # 指定資料表
+#
 
 
 @router.post("/", response_description="Add new user")
@@ -50,6 +61,15 @@ async def show_user(id: str, request: Request):
 
     raise HTTPException(status_code=404, detail=f"user {id} not found")
 
+
+@router.get("/autolike_res/{id}", response_description="Get a user who had exec auto like function and display result")
+async def show_autolike_res(id: str, request: Request):
+    collections = []
+    records = autoLikeResult_table.find({"uid": id}, {'_id': 0})
+    for record in records:
+        collections.append(record)
+    return collections
+    raise HTTPException(status_code=404, detail=f"user {id} not found")
 
 # @router.put("/{id}", response_description="Update a task")
 # async def update_task(id: str, request: Request, task: UpdateTaskModel = Body(...)):
@@ -83,7 +103,17 @@ async def show_user(id: str, request: Request):
 
 #     raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
-async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag, maxLike):
+
+async def auto_like_implem(uid, account, password, minWaitTime, maxWaitTime, hashtag, maxLike):
+    # structure for result writing
+    line_uid = uid
+    ig_account = account
+    now = datetime.now()
+    start_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    # end_time = ''
+    # num_of_liked = 0
+    author_of_liked_author = []
+
     options = Options()
     options.add_argument("--disable-notifications")
     options.add_argument("--start-maximized")  # max. the window size
@@ -130,12 +160,15 @@ async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag,
 
     # 輸入：帳號密碼
     # 執行：登入
-    time.sleep(random.randint(minWaitTime, maxWaitTime))
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
     account_textbox.send_keys(account)
-    time.sleep(random.randint(minWaitTime, maxWaitTime))
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
     password_textbox.send_keys(password)
     print('輸入完帳號密碼，等待：', minWaitTime, '~', maxWaitTime, '秒，就執行登入')
-    time.sleep(random.randint(minWaitTime, maxWaitTime))
+    await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
+    # time.sleep(random.randint(minWaitTime, maxWaitTime))
     loginBtn.click()
     print('已按下登入')
 
@@ -176,7 +209,7 @@ async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag,
 
     round = 1
     liked = 1
-    while liked < maxLike:
+    while liked <= maxLike:
         print('==============')
         print('Round: ', round)
         await asyncio.sleep(random.randint(minWaitTime, maxWaitTime))
@@ -231,6 +264,9 @@ async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag,
                         (By.CSS_SELECTOR, "div._aacl._aaco._aacw._aacx._aad6._aade div.xt0psk2 div.xt0psk2 a")), '-1')
                     # author = driver.find_element(
                     #     By.XPATH, "//div[@class='_aacl _aaco _aacw _aacx _aad6 _aade']//div[@class='xt0psk2']//span[@class='_aap6 _aap7 _aap8']//a[@class='x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _acan _acao _acat _acaw _aj1- _a6hd']").text
+                    #
+                    author_of_liked_author.append(author.text)
+                    #
                     print("Po文作者: ", author.text)
                 except Exception as e:
                     print(e)
@@ -271,12 +307,24 @@ async def auto_like_implem(account, password, minWaitTime, maxWaitTime, hashtag,
         webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         print("========")
 
-    time.sleep(20)
+    print("執行完成並結束")
+    print(author_of_liked_author)
     driver.quit()
+    now = datetime.now()
+    end_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    res_dict = {
+        "uid": line_uid,
+        "ig_account": account,
+        "start_time": start_time,
+        "end_time": end_time,
+        "num_of_liked": liked - 1,
+        "authors_of_liked": author_of_liked_author
+    }
+    autoLikeResult_table.insert_one(res_dict)
 
 
-@router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
-async def auto_like(account: str, password: str, minWaitTime: int, maxWaitTime: int, hashtag: str, maxLike: int, background_tasks: BackgroundTasks):
+@router.get("/autolike/{uid}/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
+async def auto_like(uid: str, account: str, password: str, minWaitTime: int, maxWaitTime: int, hashtag: str, maxLike: int, background_tasks: BackgroundTasks):
     background_tasks.add_task(
-        auto_like_implem, account, password, minWaitTime, maxWaitTime, hashtag, maxLike)
+        auto_like_implem, uid, account, password, minWaitTime, maxWaitTime, hashtag, maxLike)
     return 'op'
