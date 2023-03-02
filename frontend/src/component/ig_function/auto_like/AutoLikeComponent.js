@@ -7,6 +7,7 @@ import './AutoLikeComponent.css';
 
 const AutoLikeComponent = () => {
     const [inputs, setInputs] = useState({});
+    const liff_user_id = sessionStorage.getItem('liff_user_id');
 
     const showForm = () => {
 
@@ -14,13 +15,15 @@ const AutoLikeComponent = () => {
             const name = event.target.name;
             const value = event.target.value;
             setInputs(values => ({ ...values, [name]: value }))
+            setInputs(values => ({ ...values, ['uid']: liff_user_id }))
         }
 
         const handleSubmit = (event) => {
             event.preventDefault();
             console.log(inputs);
-            // @router.get("/autolike/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
+            // @router.get("/autolike/{uid}/{account}/{password}/{minWaitTime}/{maxWaitTime}/{hashtag}/{maxLike}", response_description="exec auto lilke")
             axios('/iglike/autolike/' 
+                + inputs['uid'] + "/"
                 + inputs['username'] + "/"
                 + inputs['password'] + "/"
                 + inputs['minimumWaitingTime'] + "/"
@@ -41,7 +44,7 @@ const AutoLikeComponent = () => {
         <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="formBasicEmail">
                 <Form.Label>IG 帳號</Form.Label>
-                <Form.Control type="email" name="username" value={inputs.username || ""} placeholder="輸入帳號" onChange={handleChange} />
+                <Form.Control type="txt" name="username" value={inputs.username || ""} placeholder="輸入帳號" onChange={handleChange} />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
@@ -69,22 +72,24 @@ const AutoLikeComponent = () => {
             <Form.Group className="mb-3" controlId="formBasicMinimumWaitingTime">
                 <Form.Label>min隨機等待時間</Form.Label>
                 <Form.Select name="minimumWaitingTime" value={inputs.minimumWaitingTime || ""} onChange={handleChange}>
-                    <option value="0">0s</option>
+                    <option value="">請選擇</option>
+                    <option value="1">1s</option>
+                    <option value="2">2s</option>
+                    <option value="3">3s</option>
+                    <option value="4">4s</option>
                     <option value="5">5s</option>
-                    <option value="10">10s</option>
-                    <option value="15">15s</option>
-                    <option value="20">20s</option>
                 </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicMaximumWaitingTime">
                 <Form.Label>max隨機等待時間</Form.Label>
                 <Form.Select name="maximumWaitingTime" value={inputs.maximumWaitingTime || ""} onChange={handleChange}>
-                    <option value="0">0s</option>
-                    <option value="30">30s</option>
-                    <option value="40">40s</option>
-                    <option value="50">50s</option>
-                    <option value="60">60s</option>
+                    <option value="">請選擇</option>
+                    <option value="6">6s</option>
+                    <option value="7">7s</option>
+                    <option value="8">8s</option>
+                    <option value="9">9s</option>
+                    <option value="10">10s</option>
                 </Form.Select>
             </Form.Group>
 

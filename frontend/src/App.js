@@ -17,9 +17,10 @@ const App = () => {
     const showComponent = () => {
         liff.getProfile()
         .then((profile)=>{
-            return profile.userId
-        }).then((userId)=>{
-            axios('/iglike/' + userId)
+            sessionStorage.setItem("liff_user_id", 'U71104f51176a5b84c2fe5555cb88275f')
+            // sessionStorage.setItem("liff_user_id", liff.getDecodedIDToken()['sub'])
+        }).then(()=>{
+            axios('/iglike/' + sessionStorage.getItem('liff_user_id'))
                 .then((response) => {
                     if (response['data'] === '-1') {
                         setComponent(<Unauth></Unauth>)
