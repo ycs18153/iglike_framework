@@ -15,14 +15,20 @@ const App = () => {
     }, [liff, isLoggedIn]);
 
     const showComponent = () => {
-        axios('/iglike/uu')
-        .then((response) => {
-            if (response['data'] === '-1') {
-                setComponent(<Unauth></Unauth>)
-            } else {
-                setComponent(<Auth></Auth>)
-            }
+        liff.getProfile()
+        .then((profile)=>{
+            return profile.userId
+        }).then((userId)=>{
+            axios('/iglike/' + userId)
+                .then((response) => {
+                    if (response['data'] === '-1') {
+                        setComponent(<Unauth></Unauth>)
+                    } else {
+                        setComponent(<Auth></Auth>)
+                    }
+                })
         })
+        
         return component
     }
 
