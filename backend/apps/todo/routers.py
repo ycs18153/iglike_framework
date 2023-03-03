@@ -55,7 +55,7 @@ async def list_users(request: Request):
 
 @router.get("/{id}", response_description="Get a user")
 async def show_user(id: str, request: Request):
-    if (user := await request.app.mongodb["auth_user"].find_one({"uid": id})) is not None:
+    if (user := await request.app.mongodb["auth_user"].find_one({"uid": id}, {'_id': 0})) is not None:
         return user
     else:
         return '-1'
