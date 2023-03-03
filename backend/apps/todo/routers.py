@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 #
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -121,7 +122,9 @@ async def auto_like_implem(uid, account, password, minWaitTime, maxWaitTime, has
 
     # Have to edit the path of the chrome driver
     driver = webdriver.Chrome(
-        '/Users/twlin/code/iglike_framework/backend/apps/todo/chromedriver', chrome_options=options)
+        executable_path=ChromeDriverManager().install(), chrome_options=options)
+    # driver = webdriver.Chrome(
+    #     '/Users/twlin/code/iglike_framework/backend/apps/todo/chromedriver', chrome_options=options)
     action = webdriver.ActionChains(driver)
 
     # load cookie -> for testing
